@@ -5,26 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
   <div id="app">
     <div>Tweeetツール</div><br>
-    <div>{{ emoij_replace }}</div>
+    <div>{{ emoji_replace }}</div>
     <input type="button" value="つぶやく" @click="tweet()"><br>
     <textarea v-model="input_text" placeholder="add multiple lines"></textarea>
   </div>
   <script>
-    const emoji_data = {
-      "thinking_face": "🤔",
-      "tada": "🎉",
-      "herb": "🌿",
-      "muscle": "💪"
-    }
-
     let Field = new Vue({
       el: '#app',
-      computed: {
-        emoij_replace: function(){
+      watch: {
+        input_text: function(){
+          this.emoji_replace = this.input_text
           val = this.input_text.split(":")
           for(i in val){
             if(i % 2){
@@ -32,15 +27,24 @@
                 val[i] = `:${val[i]}`
                 continue;
               }
-              val[i] = val[i] in this.emoji_data ?　this.emoji_data[val[i]] : `:${val[i]}:`
+              code = val[i].split(':').join('')
+              if (code != '') {
+                axios
+                  .get('https://www.emojidex.com/api/v1/emoji/' + code)
+                  .then(response => {
+                    if (response.data.moji != null) {
+                      this.emoji_replace = this.emoji_replace
+                        .replace(':' + response.data.code + ':', response.data.moji)
+                    }
+                  })
+              }
             }
           }
-          return val.join("")
         }
       },
       data: {
         input_text: '',
-        emoji_data
+        emoji_replace: ''
       },
       methods: {
         tweet: function(){
