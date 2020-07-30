@@ -27,12 +27,17 @@
                 val[i] = `:${val[i]}`
                 continue;
               }
-              axios
-                .get('https://www.emojidex.com/api/v1/emoji/' + val[i].split(':').join(''))
-                .then(response => {
-                  this.emoji_replace = this.emoji_replace
-                    .replace(':' + response.data.code + ':', response.data.moji)
-                })
+              code = val[i].split(':').join('')
+              if (code != '') {
+                axios
+                  .get('https://www.emojidex.com/api/v1/emoji/' + code)
+                  .then(response => {
+                    if (response.data.moji != null) {
+                      this.emoji_replace = this.emoji_replace
+                        .replace(':' + response.data.code + ':', response.data.moji)
+                    }
+                  })
+              }
             }
           }
         }
