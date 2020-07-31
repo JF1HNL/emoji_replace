@@ -1,60 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-</head>
-<body>
-  <div id="app">
-    <div>Tweeetツール</div><br>
-    <div>{{ emoij_replace }}</div>
-    <input type="button" value="つぶやく" @click="tweet()"><br>
-    <textarea v-model="input_text" placeholder="add multiple lines"></textarea>
-  </div>
-  <script>
-    const emoji_data = {
-      "thinking_face": "🤔",
-      "tada": "🎉",
-      "herb": "🌿",
-      "muscle": "💪"
-    }
-
-    let Field = new Vue({
-      el: '#app',
-      computed: {
-        emoij_replace: function(){
-          val = this.input_text.split(":")
-          for(i in val){
-            if(i % 2){
-              if(i == (val.length - 1)){
-                val[i] = `:${val[i]}`
-                continue;
-              }
-              val[i] = val[i] in this.emoji_data ?　this.emoji_data[val[i]] : `:${val[i]}:`
-            }
-          }
-          return val.join("")
-        }
-      },
-      data: {
-        input_text: '',
-        emoji_data
-      },
-      methods: {
-        tweet: function(){
-          const content = {
-            text: this.emoij_replace
-          };
-          for (let key in content) {
-            content[key] = encodeURIComponent(content[key]);
-          }
-          const tweet_text = `https://twitter.com/intent/tweet?text=${content.text}`;
-          window.open(tweet_text);
-        }
-      }
-    })
-  </script>
-</body>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>emoji-tweet</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <!-- built files will be auto injected -->
+  </body>
 </html>
