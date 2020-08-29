@@ -1,26 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>emoji replace</title>
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <style>
+    div,input,textarea{
+      text-align: center ;
+    }
+    textarea {
+      width: 80vw;
+      height: 30vw;
+    }
+  </style>
 </head>
 <body>
   <div id="app">
     <div>Tweeetツール</div><br>
     <div>{{ emoij_replace }}</div>
-    <input type="button" value="つぶやく" @click="tweet()"><br>
-    <textarea v-model="input_text" placeholder="add multiple lines"></textarea>
+    <textarea v-model="input_text" placeholder="ツイート内容"></textarea><br>
+    <input type="button" value="つぶやく" @click="tweet()">
   </div>
   <script>
-    const emoji_data = {
-      "thinking_face": "🤔",
-      "tada": "🎉",
-      "herb": "🌿",
-      "muscle": "💪"
-    }
-
+    const objectToMap = object =>
+      new Map(Object.entries(object))
+    const localStorageData = localStorage.getItem('tweetdeck_emoji-emojiStore')
+	  const emojiStore = localStorageData ? objectToMap(JSON.parse(localStorageData)) : new Map()
     let Field = new Vue({
       el: '#app',
       computed: {
@@ -32,7 +38,7 @@
                 val[i] = `:${val[i]}`
                 continue;
               }
-              val[i] = val[i] in this.emoji_data ?　this.emoji_data[val[i]] : `:${val[i]}:`
+              val[i] = this.emojiGet(val[i])
             }
           }
           return val.join("")
@@ -40,7 +46,7 @@
       },
       data: {
         input_text: '',
-        emoji_data
+        emojiStore
       },
       methods: {
         tweet: function(){
@@ -52,6 +58,24 @@
           }
           const tweet_text = `https://twitter.com/intent/tweet?text=${content.text}`;
           window.open(tweet_text);
+        },
+        emojiGet : function(code){
+          const mapToObject = map =>
+            [...map].reduce((l,[k,v]) => Object.assign(l, {[k]:v}), {})
+          if (this.emojiStore.has(code)) {
+            return this.emojiStore.get(code)
+          }
+          fetch('https://www.emojidex.com/api/v1/emoji/' + code)
+            .then(async response => {
+              if (response.ok) {
+                const data = await response.json()
+                this.emojiStore.set(code, data.moji)
+                localStorage.setItem('tweetdeck_emoji-emojiStore',　JSON.stringify(mapToObject(this.emojiStore)))
+                console.log(data.moji)
+                return data.moji
+              }
+              return code
+            })
         }
       }
     })
