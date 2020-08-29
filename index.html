@@ -13,12 +13,16 @@
       width: 80vw;
       height: 30vw;
     }
+    input[type=text] {
+      font-size: 16px;
+      transform: scale(0.8);
+    }
   </style>
 </head>
 <body>
   <div id="app">
     <div>Tweeetツール</div><br>
-    <div>{{ emoij_replace }}</div>
+    <div>{{ emoji_replace }}</div>
     <textarea v-model="input_text" placeholder="ツイート内容"></textarea><br>
     <input type="button" value="つぶやく" @click="tweet()">
   </div>
@@ -29,8 +33,9 @@
 	  const emojiStore = localStorageData ? objectToMap(JSON.parse(localStorageData)) : new Map()
     let Field = new Vue({
       el: '#app',
-      computed: {
-        emoij_replace: function(){
+      watch: {
+        input_text: function(){
+          this.emoji_replace = this.input_text
           val = this.input_text.split(":")
           for(i in val){
             if(i % 2){
@@ -38,20 +43,39 @@
                 val[i] = `:${val[i]}`
                 continue;
               }
-              val[i] = this.emojiGet(val[i])
+              code = val[i].split(':').join('')
+              if (code != '') {
+                const mapToObject = map =>
+                  [...map].reduce((l,[k,v]) => Object.assign(l, {[k]:v}), {})
+                const emojiSet = (code, moji) => this.emoji_replace = this.emoji_replace.replace(':' + code + ':', moji)
+                if (this.emojiStore.has(code)) {
+                  emojiSet(code, this.emojiStore.get(code))
+                  continue
+                }
+                fetch('https://www.emojidex.com/api/v1/emoji/' + code)
+                  .then(async response => {
+                    if (response.ok) {
+                      const data = await response.json()
+                      this.emojiStore.set(code, data.moji)
+                      localStorage.setItem('tweetdeck_emoji-emojiStore',　JSON.stringify(mapToObject(this.emojiStore)))
+                      console.log(data.moji)
+                      emojiSet(code, data.moji)
+                    }
+                  })
+              }
             }
           }
-          return val.join("")
         }
       },
       data: {
+        emoji_replace: '',
         input_text: '',
         emojiStore
       },
       methods: {
         tweet: function(){
           const content = {
-            text: this.emoij_replace
+            text: this.emoji_replace
           };
           for (let key in content) {
             content[key] = encodeURIComponent(content[key]);
@@ -60,22 +84,7 @@
           window.open(tweet_text);
         },
         emojiGet : function(code){
-          const mapToObject = map =>
-            [...map].reduce((l,[k,v]) => Object.assign(l, {[k]:v}), {})
-          if (this.emojiStore.has(code)) {
-            return this.emojiStore.get(code)
-          }
-          fetch('https://www.emojidex.com/api/v1/emoji/' + code)
-            .then(async response => {
-              if (response.ok) {
-                const data = await response.json()
-                this.emojiStore.set(code, data.moji)
-                localStorage.setItem('tweetdeck_emoji-emojiStore',　JSON.stringify(mapToObject(this.emojiStore)))
-                console.log(data.moji)
-                return data.moji
-              }
-              return code
-            })
+          return
         }
       }
     })
