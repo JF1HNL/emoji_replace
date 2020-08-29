@@ -25,6 +25,7 @@
     <div>{{ emoji_replace }}</div>
     <textarea v-model="input_text" placeholder="ツイート内容"></textarea><br>
     <input type="button" value="つぶやく" @click="tweet()">
+    <input type="button" value="コピーする" @click="copy()">
   </div>
   <script>
     const objectToMap = object =>
@@ -83,8 +84,8 @@
           const tweet_text = `https://twitter.com/intent/tweet?text=${content.text}`;
           window.open(tweet_text);
         },
-        emojiGet : function(code){
-          return
+        copy : function(){
+          navigator.clipboard.writeText(this.emoji_replace);
         }
       }
     })
