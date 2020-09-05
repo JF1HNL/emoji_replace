@@ -9,11 +9,13 @@
 </head>
 <body>
   <div id="app">
-    <div>Tweeetツール</div><br>
-    <div>{{ emoji_replace }}</div>
-    <textarea v-model="input_text" placeholder="ツイート内容"></textarea><br>
-    <input type="button" value="つぶやく" @click="tweet()">
-    <input type="button" value="コピーする" @click="copy()">
+    <div class="title">Emoji Replace</div>
+    <div class="display">
+      <div v-html="emoji_replace_display"></div>
+    </div>
+    <textarea v-model="input_text" placeholder="ツイート内容"></textarea>
+    <div class="button" @click="tweet()">つぶやく</div>
+    <div class="button" @click="copy()">コピーする</div>
   </div>
   <script src="index.js"></script>
 </body>

@@ -4,6 +4,15 @@ const localStorageData = localStorage.getItem('tweetdeck_emoji-emojiStore')
 const emojiStore = localStorageData ? objectToMap(JSON.parse(localStorageData)) : new Map()
 let Field = new Vue({
   el: '#app',
+  computed: {
+    emoji_replace_display : function(){
+      let emoji_replace = this.emoji_replace;
+      if(emoji_replace === ""){
+        return "ツイート内容"
+      }
+      return emoji_replace.split("\n").map(x => `<div>${x}</div>`).join("")
+    }
+  },
   watch: {
     input_text: function(){
       this.emoji_replace = this.input_text
